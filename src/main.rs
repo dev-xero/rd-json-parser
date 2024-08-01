@@ -1,6 +1,7 @@
 mod reader;
-mod tokenizer;
 mod token;
+mod tokenizer;
+mod util;
 
 use std::io::{self, Write};
 
@@ -10,7 +11,7 @@ use tokenizer::Tokenizer;
 fn main() {
     // Mutable path reference
     let mut json_path: String = String::new();
-    
+
     // Clear input buffer
     print!("> JSON File Path: ");
     io::stdout().flush().unwrap();
@@ -24,13 +25,17 @@ fn main() {
     let json_path: String = json_path.trim().to_string();
 
     // Read file and return contents
-    let content: String = reader::read_json(json_path);
-    let lexer: Tokenizer = tokenizer::Tokenizer {
+    let mut content: String = reader::read_json(json_path);
+
+    // Remove whitespace and lex string
+    util::remove_whitespace(&mut content);
+    let mut lexer: Tokenizer = tokenizer::Tokenizer {
         pos: 0,
-        line: 1,
-        source: content
+        source: content.trim().to_string(),
     };
 
-    let tokens: Vec<Token> = lexer.tokenize();
-    println!("{tokens:?}");
+    let tokens: Vec<Token> = lexer.scan();
+    for i in 0..tokens.len() {
+        println!("{:?}", tokens[i]);
+    }
 }

@@ -1,5 +1,3 @@
 {
-    "name": "json-parser",
-    "lang": "rust",
-    "version": 1
+    "name": "json-parser"
 }
