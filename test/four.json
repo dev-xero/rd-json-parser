@@ -1,6 +1,6 @@
 {
     "name": "json-parser",
     "working": true,
-    "errors": null,
-    "warnings": false
+    "warnings": false,
+    "errors": null
 }
