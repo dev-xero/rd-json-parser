@@ -17,7 +17,7 @@ impl Tokenizer {
         return None;
     }
 
-    // Peak one character forward
+    // Peek one character forward
     fn peek(&self) -> Option<char> {
         if self.pos + 1 < self.source.len() {
             return self.source.chars().nth(self.pos + 1);
@@ -68,7 +68,27 @@ impl Tokenizer {
 
     // Tokenize identifiers (true/false/null)
     fn scan_key(&mut self) -> Option<String> {
-        return None;
+        let start_pos: usize = self.pos;
+
+        if (self.pos + 4) <= self.source.len() {
+            let next_four = self.source[start_pos..(self.pos + 4)].to_string();
+            if next_four == "null" || next_four == "true" {
+                self.pos += 4;
+                return Some(next_four);
+            } else if (self.pos + 5) <= self.source.len() {
+                let next_five = self.source[start_pos..(self.pos + 5)].to_string();
+                if next_five == "false" {
+                    self.pos += 5;
+                    return Some(next_five);
+                }
+            }
+        }
+
+        panic!(
+            "Unexpected identifier: '{}' at pos: {}",
+            self.source[start_pos..self.pos].to_string(),
+            self.pos
+        );
     }
 
     // Tokenize a valid JSON string
@@ -132,10 +152,27 @@ impl Tokenizer {
                     self.pos -= 1; // reset cursor
                 }
                 _ => {
-                    panic!(
-                        "Unexpected character '{}' encountered at pos: {}",
-                        lexeme, self.pos
-                    );
+                    if lexeme.is_alphabetic() {
+                        if let Some(res) = self.scan_key() {
+                            if res == "true" || res == "false" {
+                                tokens.push(Token {
+                                    kind: TokenKind::BOOLEAN,
+                                    value: Some(res),
+                                })
+                            } else {
+                                tokens.push(Token {
+                                    kind: TokenKind::NULL,
+                                    value: None,
+                                })
+                            }
+                            self.pos -= 1;
+                        }
+                    } else {
+                        panic!(
+                            "Unexpected character '{}' encountered at pos: {}",
+                            lexeme, self.pos
+                        );
+                    }
                 }
             }
 

@@ -1,8 +1,5 @@
 {
     "name": "json-parser",
     "lang": "rust",
-    "version": 2.3,
-    "diff": -11.0,
-    "history": 3,
-    "warn": -1.2
+    "version": 2.3
 }
