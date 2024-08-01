@@ -8,6 +8,59 @@ pub struct Tokenizer {
 
 // Methods
 impl Tokenizer {
+    // Advance one character forward
+    fn advance(&mut self) -> Option<char> {
+        if self.pos < self.source.len() {
+            self.pos += 1;
+            return self.source.chars().nth(self.pos - 1);
+        }
+        return None;
+    }
+
+    // Tokenize string values
+    fn scan_str(&mut self) -> Option<String> {
+        let start_pos: usize = self.pos;
+
+        // Continue iteration till ending quote or EOF
+        while self.pos < self.source.len() {
+            let next: char = self.advance().unwrap();
+
+            // Handle EOF
+            if next == '\0' {
+                panic!("Unexpected end of file at pos: {}", self.pos);
+            }
+
+            // Handle closing quotes
+            if next == '"' {
+                return Some(self.source[start_pos..self.pos - 1].to_string());
+            }
+        }
+
+        return None;
+    }
+
+    // Tokenize integer values
+    fn scan_num(&mut self) -> Option<String> {
+        let start_pos: usize = self.pos;
+        let mut has_decimal = false;
+
+        // Iterate till we're out of numbers
+        while self.pos < self.source.len() {
+            let curr_char: char = self.source.chars().nth(self.pos).unwrap();
+
+            if curr_char.is_numeric() {
+                self.advance();
+            } else if curr_char == '.' && !has_decimal {
+                has_decimal = true;
+                self.advance();
+            } else {
+                return Some(self.source[start_pos..self.pos].to_string());
+            }
+        }
+
+        return None;
+    }
+
     // Tokenize a valid JSON string
     pub fn scan(&mut self) -> Vec<Token> {
         println!("{}", self.source);
@@ -48,12 +101,19 @@ impl Tokenizer {
                     self.pos -= 1; // set cursor at closing quote
                 }
                 '0'..='9' | '-' => {
+                    let mut num: String = String::new();
+                    if lexeme == '-' {
+                        num.push('-');
+                        self.advance();
+                    }
                     if let Some(res) = self.scan_num() {
+                        num += &res;
                         tokens.push(Token {
                             kind: TokenKind::NUMBER,
-                            value: Some(res),
+                            value: Some(num),
                         });
                     }
+                    self.pos -= 1;
                 }
                 _ => {
                     panic!("Unexpected character '{}' at pos: {}", lexeme, self.pos);
@@ -64,70 +124,5 @@ impl Tokenizer {
         }
 
         return tokens;
-    }
-
-    // Tokenize string values
-    fn scan_str(&mut self) -> Option<String> {
-        let start_pos: usize = self.pos;
-
-        // Continue iteration till ending quote or EOF
-        while self.pos < self.source.len() {
-            let next: char = self.advance().unwrap();
-
-            // Handle EOF
-            if next == '\0' {
-                panic!("Unexpected end of file at pos: {}", self.pos);
-            }
-
-            // Handle closing quotes
-            if next == '"' {
-                return Some(self.source[start_pos..self.pos - 1].to_string());
-            }
-        }
-
-        return None;
-    }
-
-    // Tokenize integer values
-    fn scan_num(&mut self) -> Option<String> {
-        let start_pos: usize = self.pos;
-        let mut has_decimal = false;
-
-        // Iterate till we're out of numbers
-        while self.pos < self.source.len() {
-            let curr_char: char = self.source.chars().nth(self.pos).unwrap();
-
-            if curr_char.is_numeric() {
-                self.advance();
-            } else if curr_char == '.' && !has_decimal {
-                has_decimal = true;
-                self.advance();
-            } else {
-                break;
-            }
-        }
-
-        if self.pos > start_pos {
-            return Some(self.source[start_pos..self.pos].to_string());
-        }
-
-        return None;
-    }
-
-    // Peak next character in sequence
-    fn peek(&self) -> Option<char> {
-        if self.pos < self.source.len() {
-            return self.source.chars().nth(self.pos + 1);
-        }
-        return None;
-    }
-
-    // Advance one character forward
-    fn advance(&mut self) -> Option<char> {
-        if self.pos < self.source.len() {
-            self.pos += 1;
-            return self.source.chars().nth(self.pos - 1);
-        }
-        return None;
     }
 }
