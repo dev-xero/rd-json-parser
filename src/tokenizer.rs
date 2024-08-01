@@ -17,23 +17,30 @@ impl Tokenizer {
         return None;
     }
 
+    // Peak one character forward
+    fn peek(&self) -> Option<char> {
+        if self.pos + 1 < self.source.len() {
+            return self.source.chars().nth(self.pos + 1);
+        }
+        return None;
+    }
+
     // Tokenize string values
     fn scan_str(&mut self) -> Option<String> {
         let start_pos: usize = self.pos;
 
-        // Continue iteration till ending quote or EOF
-        while self.pos < self.source.len() {
-            let next: char = self.advance().unwrap();
-
-            // Handle EOF
-            if next == '\0' {
-                panic!("Unexpected end of file at pos: {}", self.pos);
+        // Iterate till closing quote or EOF
+        while (self.pos + 1) < self.source.len() {
+            if self.peek().unwrap() == '\0' {
+                panic!("Unexpected EOF at pos: {}", self.pos);
             }
 
-            // Handle closing quotes
-            if next == '"' {
-                return Some(self.source[start_pos..self.pos - 1].to_string());
+            if self.peek().unwrap() == '"' {
+                self.advance();
+                return Some(self.source[start_pos..self.pos].to_string());
             }
+
+            self.advance();
         }
 
         return None;
@@ -42,22 +49,25 @@ impl Tokenizer {
     // Tokenize integer values
     fn scan_num(&mut self) -> Option<String> {
         let start_pos: usize = self.pos;
-        let mut has_decimal = false;
+        let mut has_decimal: bool = false;
 
-        // Iterate till we're out of numbers
-        while self.pos < self.source.len() {
-            let curr_char: char = self.source.chars().nth(self.pos).unwrap();
-
-            if curr_char.is_numeric() {
-                self.advance();
-            } else if curr_char == '.' && !has_decimal {
+        while (self.pos + 1) < self.source.len() {
+            let next: char = self.peek().unwrap();
+            if !next.is_numeric() && next == '.' && !has_decimal {
                 has_decimal = true;
                 self.advance();
+            } else if next.is_numeric() {
+                self.advance();
             } else {
+                self.advance();
                 return Some(self.source[start_pos..self.pos].to_string());
             }
         }
+        return None;
+    }
 
+    // Tokenize identifiers (true/false/null)
+    fn scan_key(&mut self) -> Option<String> {
         return None;
     }
 
@@ -66,6 +76,14 @@ impl Tokenizer {
         println!("{}", self.source);
         let mut tokens: Vec<Token> = Vec::new();
         let char_vect: Vec<char> = self.source.chars().collect();
+
+        // Panic on trailing chars
+        if !char_vect[char_vect.len() - 2].is_alphanumeric() {
+            panic!(
+                "Unexpected trailing character: '{}'",
+                char_vect[char_vect.len() - 2]
+            );
+        }
 
         // Iterate till the end
         while self.pos < self.source.len() {
@@ -90,33 +108,34 @@ impl Tokenizer {
                     value: None,
                 }),
                 '"' => {
-                    self.advance(); // consume opening "
+                    self.advance(); // consume '"'
                     if let Some(res) = self.scan_str() {
-                        // Pure strings
                         tokens.push(Token {
                             kind: TokenKind::STRING,
                             value: Some(res),
-                        });
+                        })
                     }
-                    self.pos -= 1; // set cursor at closing quote
                 }
                 '0'..='9' | '-' => {
                     let mut num: String = String::new();
                     if lexeme == '-' {
                         num.push('-');
-                        self.advance();
+                        self.advance(); // consume "-"
                     }
                     if let Some(res) = self.scan_num() {
                         num += &res;
                         tokens.push(Token {
                             kind: TokenKind::NUMBER,
                             value: Some(num),
-                        });
+                        })
                     }
-                    self.pos -= 1;
+                    self.pos -= 1; // reset cursor
                 }
                 _ => {
-                    panic!("Unexpected character '{}' at pos: {}", lexeme, self.pos);
+                    panic!(
+                        "Unexpected character '{}' encountered at pos: {}",
+                        lexeme, self.pos
+                    );
                 }
             }
 

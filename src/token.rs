@@ -7,7 +7,6 @@ pub enum TokenKind {
     COMMA,
     STRING,
     NUMBER,
-    OBJECT,
     BOOLEAN,
     NULL
 }
