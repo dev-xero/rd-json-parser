@@ -46,7 +46,7 @@ impl Tokenizer {
         return None;
     }
 
-    // Tokenize integer values
+    // Tokenize number values
     fn scan_num(&mut self) -> Option<String> {
         let start_pos: usize = self.pos;
         let mut has_decimal: bool = false;
@@ -67,16 +67,16 @@ impl Tokenizer {
     }
 
     // Tokenize identifiers (true/false/null)
-    fn scan_key(&mut self) -> Option<String> {
+    fn scan_identifier(&mut self) -> Option<String> {
         let start_pos: usize = self.pos;
 
         if (self.pos + 4) <= self.source.len() {
-            let next_four = self.source[start_pos..(self.pos + 4)].to_string();
+            let next_four: String = self.source[start_pos..(self.pos + 4)].to_string();
             if next_four == "null" || next_four == "true" {
                 self.pos += 4;
                 return Some(next_four);
             } else if (self.pos + 5) <= self.source.len() {
-                let next_five = self.source[start_pos..(self.pos + 5)].to_string();
+                let next_five: String = self.source[start_pos..(self.pos + 5)].to_string();
                 if next_five == "false" {
                     self.pos += 5;
                     return Some(next_five);
@@ -98,7 +98,8 @@ impl Tokenizer {
         let char_vect: Vec<char> = self.source.chars().collect();
 
         // Panic on trailing chars
-        if !char_vect[char_vect.len() - 2].is_alphanumeric() {
+        let trailing: char = char_vect[char_vect.len() - 2];
+        if !trailing.is_alphanumeric() && trailing != 'c' {
             panic!(
                 "Unexpected trailing character: '{}'",
                 char_vect[char_vect.len() - 2]
@@ -153,7 +154,7 @@ impl Tokenizer {
                 }
                 _ => {
                     if lexeme.is_alphabetic() {
-                        if let Some(res) = self.scan_key() {
+                        if let Some(res) = self.scan_identifier() {
                             if res == "true" || res == "false" {
                                 tokens.push(Token {
                                     kind: TokenKind::BOOLEAN,
