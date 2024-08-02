@@ -1,0 +1,11 @@
+{
+    "name": "json-parser",
+    "lang": "rust",
+    "version": 1.0,
+    "spec": {
+        "objects": true,
+        "boolean": true,
+        "exponential": false,
+        "errors": null
+    }
+}
