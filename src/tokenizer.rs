@@ -99,7 +99,7 @@ impl Tokenizer {
 
         // Panic on trailing chars
         let trailing: char = char_vect[char_vect.len() - 2];
-        if !trailing.is_alphanumeric() && trailing != 'c' {
+        if !trailing.is_alphanumeric() && trailing != '{' {
             panic!(
                 "Unexpected trailing character: '{}'",
                 char_vect[char_vect.len() - 2]
