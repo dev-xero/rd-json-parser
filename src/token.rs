@@ -28,6 +28,6 @@ pub struct Token {
 // Formatting for display: token
 impl Token {
     pub fn debug(&self) {
-        println!("kind: {:?}, value: {:?}", self.kind, self.value);
+        println!("{:?}", self.value);
     }
 }

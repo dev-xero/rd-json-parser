@@ -28,7 +28,7 @@ fn main() {
 
     // Read file and return contents
     let mut content: String = reader::read_json(json_path);
-    println!("\n{content}");
+    println!("\nContent: {content}");
 
     // Remove whitespace and lex string
     util::remove_whitespace(&mut content);
@@ -41,5 +41,5 @@ fn main() {
     let mut parser: Parser = Parser::new(0, tokens);
     let res = parser.parse();
 
-    println!("Parsed: {:#?}", res);
+    println!("\nParsed: {:#?}", res);
 }
