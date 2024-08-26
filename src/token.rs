@@ -1,5 +1,5 @@
 // Token kind
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TokenKind {
     LBRACE,
     RBRACE,
@@ -8,7 +8,7 @@ pub enum TokenKind {
     STRING,
     NUMBER,
     BOOLEAN,
-    NULL
+    NULL,
 }
 
 // Formatting for display: token kind
@@ -19,10 +19,10 @@ impl TokenKind {
 }
 
 // Token struct, each token has a 'kind' and value
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Token {
     pub kind: TokenKind,
-    pub value: Option<String>
+    pub value: Option<String>,
 }
 
 // Formatting for display: token

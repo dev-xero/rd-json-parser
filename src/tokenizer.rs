@@ -93,13 +93,12 @@ impl Tokenizer {
 
     // Tokenize a valid JSON string
     pub fn scan(&mut self) -> Vec<Token> {
-        println!("{}", self.source);
         let mut tokens: Vec<Token> = Vec::new();
         let char_vect: Vec<char> = self.source.chars().collect();
 
         // Panic on trailing chars
         let trailing: char = char_vect[char_vect.len() - 2];
-        if !trailing.is_alphanumeric() && trailing != '{' && trailing != '}' {
+        if !trailing.is_alphanumeric() && trailing != '{' && trailing != '}' && trailing != '"' {
             panic!(
                 "Unexpected trailing character: '{}'",
                 char_vect[char_vect.len() - 2]
@@ -109,7 +108,6 @@ impl Tokenizer {
         // Iterate till the end
         while self.pos < self.source.len() {
             let lexeme: char = char_vect[self.pos];
-            println!("curr: {}, max: {}", self.pos, self.source.len());
 
             match lexeme {
                 '{' => tokens.push(Token {

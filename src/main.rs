@@ -1,3 +1,4 @@
+mod parser;
 mod reader;
 mod token;
 mod tokenizer;
@@ -5,6 +6,7 @@ mod util;
 
 use std::io::{self, Write};
 
+use parser::Parser;
 use token::Token;
 use tokenizer::Tokenizer;
 
@@ -26,6 +28,7 @@ fn main() {
 
     // Read file and return contents
     let mut content: String = reader::read_json(json_path);
+    println!("\n{content}");
 
     // Remove whitespace and lex string
     util::remove_whitespace(&mut content);
@@ -35,7 +38,8 @@ fn main() {
     };
 
     let tokens: Vec<Token> = lexer.scan();
-    for i in 0..tokens.len() {
-        println!("{:?}", tokens[i]);
-    }
+    let mut parser: Parser = Parser::new(0, tokens);
+    let res = parser.parse();
+
+    println!("Parsed: {:#?}", res);
 }
